@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+} from "firebase/auth";
 import app from "../Firebase/Firebase.config";
 
 const auth = getAuth(app);
@@ -29,12 +34,6 @@ const Register = () => {
     if (!/(?=.*[A-Z])/.test(password)) {
       setErr("Please add at least one uppercase");
       return;
-    } else if (!/(?=.*[0-9].*[0-9])/.test(password)) {
-      setErr("Please add at least two numbers");
-      return;
-    } else if (password.length < 6) {
-      setErr("Please add at least 6 characters in your password");
-      return;
     }
 
     createUserWithEmailAndPassword(auth, email, password)
@@ -45,11 +44,32 @@ const Register = () => {
 
         event.target.reset();
         setSuccess("user has benn created");
+        sendVerificationEmail(result.user);
+        setUpdateUser(result.user, name);
       })
       .catch((error) => {
         const errorMessage = error.message;
         setErr(errorMessage);
         // ..
+      });
+  };
+
+  const sendVerificationEmail = (user) => {
+    sendEmailVerification(user)
+      .then((result) => {
+        console.log(result);
+        alert("please varify Email");
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const setUpdateUser = (name) => {
+    updateProfile(user, {
+      displayName: name,
+    })
+      .then(() => {})
+      .catch((error) => {
+        setErr(error);
       });
   };
 
